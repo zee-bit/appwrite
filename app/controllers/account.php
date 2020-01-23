@@ -80,7 +80,6 @@ $utopia->get('/v1/account/sessions')
     ->action(
         function () use ($response, $user) {
             $tokens = $user->getAttribute('tokens', []);
-            $reader = new Reader(__DIR__.'/../db/GeoLite2/GeoLite2-Country.mmdb');
             $sessions = [];
             $current = Auth::tokenVerify($tokens, Auth::TOKEN_TYPE_LOGIN, Auth::$secret);
             $index = 0;
@@ -111,15 +110,6 @@ $utopia->get('/v1/account/sessions')
                     'geo' => [],
                     'current' => ($current == $token->getUid()) ? true : false,
                 ];
-
-                try {
-                    $record = $reader->country($token->getAttribute('ip', ''));
-                    $sessions[$index]['geo']['isoCode'] = strtolower($record->country->isoCode);
-                    $sessions[$index]['geo']['country'] = (isset($countries[$record->country->isoCode])) ? $countries[$record->country->isoCode] : Locale::getText('locale.country.unknown');
-                } catch (\Exception $e) {
-                    $sessions[$index]['geo']['isoCode'] = '--';
-                    $sessions[$index]['geo']['country'] = Locale::getText('locale.country.unknown');
-                }
 
                 ++$index;
             }
@@ -158,7 +148,6 @@ $utopia->get('/v1/account/security')
                 'account.update.password',
             ]);
 
-            $reader = new Reader(__DIR__.'/../db/GeoLite2/GeoLite2-Country.mmdb');
             $output = [];
 
             foreach ($logs as $i => &$log) {
@@ -181,16 +170,6 @@ $utopia->get('/v1/account/security')
                     'model' => $dd->getModel(),
                     'geo' => [],
                 ];
-
-                try {
-                    $record = $reader->country($log['ip']);
-                    $output[$i]['geo']['isoCode'] = strtolower($record->country->isoCode);
-                    $output[$i]['geo']['country'] = $record->country->name;
-                    $output[$i]['geo']['country'] = (isset($countries[$record->country->isoCode])) ? $countries[$record->country->isoCode] : Locale::getText('locale.country.unknown');
-                } catch (\Exception $e) {
-                    $output[$i]['geo']['isoCode'] = '--';
-                    $output[$i]['geo']['country'] = Locale::getText('locale.country.unknown');
-                }
             }
 
             $response->json($output);

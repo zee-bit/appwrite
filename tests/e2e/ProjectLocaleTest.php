@@ -14,27 +14,6 @@ class ProjectLocaleTest extends BaseProjects
     /**
      * @depends testRegisterSuccess
      */
-    public function testLocaleReadSuccess(array $data): array
-    {
-        $locale = $this->client->call(Client::METHOD_GET, '/locale', [
-            'content-type' => 'application/json',
-            'x-appwrite-project' => $data['projectUid'],
-        ]);
-
-        $this->assertArrayHasKey('ip', $locale['body']);
-        $this->assertArrayHasKey('countryCode', $locale['body']);
-        $this->assertArrayHasKey('country', $locale['body']);
-        $this->assertArrayHasKey('continent', $locale['body']);
-        $this->assertArrayHasKey('continentCode', $locale['body']);
-        $this->assertArrayHasKey('eu', $locale['body']);
-        $this->assertArrayHasKey('currency', $locale['body']);
-
-        return $data;
-    }
-
-    /**
-     * @depends testRegisterSuccess
-     */
     public function testLocaleCountriesReadSuccess(array $data): array
     {
         $countries = $this->client->call(Client::METHOD_GET, '/locale/countries', [

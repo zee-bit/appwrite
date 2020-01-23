@@ -156,8 +156,8 @@
                                     <span data-ls-bind="{{session.client.name}}"></span> <span data-ls-bind="{{session.client.version}}"></span> on <span data-ls-bind="{{session.model}}"></span> <span data-ls-bind="{{session.OS.name}}"></span> <span data-ls-bind="{{session.OS.version}}"></span>
 
                                     <div class="margin-top-small">
-                                        <img data-ls-attrs="src={{env.API}}/avatars/flags/{{session.geo.isoCode}}?width=80&height=80&project={{env.PROJECT}}" class="avatar xs margin-end-small inline" />
-                                        <small data-ls-bind="{{session.ip}}"></small> / <small data-ls-bind="{{session.geo.country}}"></small>
+                                        <!-- <img data-ls-attrs="src={{env.API}}/avatars/flags/{{session.geo.isoCode}}?width=80&height=80&project={{env.PROJECT}}" class="avatar xs margin-end-small inline" /> -->
+                                        <small data-ls-bind="{{session.ip}}"></small><!-- / <small data-ls-bind="{{session.geo.country}}"></small> -->
                                     </div>
                                 </li>
                             </ul>
@@ -199,7 +199,7 @@
                                     <th width="140">Date</th>
                                     <th width="175">Event</th>
                                     <th>Client</th>
-                                    <th width="90">Location</th>
+                                    <!-- <th width="90">Location</th> -->
                                     <th width="90">IP</th>
                                 </tr>
                             </thead>
@@ -211,10 +211,10 @@
                                         <img data-ls-attrs="src={{env.API}}/avatars/browsers/{{log.client.short_name|lowercase}}?width=80&height=80&project={{env.PROJECT}},title={{log.client.name}},alt={{log.client.name}}" class="avatar xs inline margin-end-small" />
                                         <span data-ls-bind="{{log.client.name}} {{log.client.version}} on {{log.model}} {{log.OS.name}} {{log.OS.version}}"></span>
                                     </td>
-                                    <td data-title="Location: ">
+                                    <!-- <td data-title="Location: ">
                                         <img data-ls-attrs="src={{env.API}}/avatars/flags/{{log.geo.isoCode}}?width=80&height=80&project={{env.PROJECT}}" class="avatar xs inline margin-end-small" />
                                         <span data-ls-bind="{{log.geo.country}}"></span>
-                                    </td>
+                                    </td> -->
                                     <td data-title="IP: "><span data-ls-bind="{{log.ip}}"></span></td>
                                 </tr>
                             </tbody>

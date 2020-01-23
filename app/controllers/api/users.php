@@ -6,6 +6,7 @@ use Auth\Auth;
 use Auth\Validator\Password;
 use Utopia\Exception;
 use Utopia\Response;
+use Utopia\Validator\Assoc;
 use Utopia\Validator\WhiteList;
 use Utopia\Validator\Email;
 use Utopia\Validator\Text;
@@ -18,7 +19,7 @@ use Database\Validator\UID;
 use DeviceDetector\DeviceDetector;
 use GeoIp2\Database\Reader;
 
-include_once 'shared/api.php';
+include_once __DIR__ . '/../shared/api.php';
 
 $utopia->get('/v1/users')
     ->desc('List Users')
@@ -114,7 +115,7 @@ $utopia->get('/v1/users/:userId')
     );
 
 $utopia->get('/v1/users/:userId/prefs')
-    ->desc('Get User Prefs')
+    ->desc('Get User Preferences')
     ->label('scope', 'users.read')
     ->label('sdk.namespace', 'users')
     ->label('sdk.method', 'getUserPrefs')
@@ -130,12 +131,9 @@ $utopia->get('/v1/users/:userId/prefs')
 
             $prefs = $user->getAttribute('prefs', '');
 
-            if (empty($prefs)) {
-                $prefs = '[]';
-            }
-
             try {
                 $prefs = json_decode($prefs, true);
+                $prefs = ($prefs) ? $prefs : [];
             } catch (\Exception $error) {
                 throw new Exception('Failed to parse prefs', 500);
             }
@@ -360,13 +358,13 @@ $utopia->patch('/v1/users/:userId/status')
     );
 
 $utopia->patch('/v1/users/:userId/prefs')
-    ->desc('Update User Prefs')
+    ->desc('Update User Preferences')
     ->label('scope', 'users.write')
     ->label('sdk.namespace', 'users')
     ->label('sdk.method', 'updateUserPrefs')
     ->label('sdk.description', '/docs/references/users/update-user-prefs.md')
     ->param('userId', '', function () { return new UID(); }, 'User unique ID.')
-    ->param('prefs', '', function () { return new \Utopia\Validator\Mock(); }, 'Prefs key-value JSON object string.')
+    ->param('prefs', '', function () { return new Assoc();}, 'Prefs key-value JSON object.')
     ->action(
         function ($userId, $prefs) use ($response, $projectDB, $providers) {
             $user = $projectDB->getDocument($userId);
@@ -375,8 +373,11 @@ $utopia->patch('/v1/users/:userId/prefs')
                 throw new Exception('User not found', 404);
             }
 
+            $old = json_decode($user->getAttribute('prefs', '{}'), true);
+            $old = ($old) ? $old : [];
+
             $user = $projectDB->updateDocument(array_merge($user->getArrayCopy(), [
-                'prefs' => json_encode(array_merge(json_decode($user->getAttribute('prefs', '{}'), true), $prefs)),
+                'prefs' => json_encode(array_merge($old, $prefs)),
             ]));
 
             if (false === $user) {
@@ -385,12 +386,9 @@ $utopia->patch('/v1/users/:userId/prefs')
 
             $prefs = $user->getAttribute('prefs', '');
 
-            if (empty($prefs)) {
-                $prefs = '[]';
-            }
-
             try {
                 $prefs = json_decode($prefs, true);
+                $prefs = ($prefs) ? $prefs : [];
             } catch (\Exception $error) {
                 throw new Exception('Failed to parse prefs', 500);
             }
