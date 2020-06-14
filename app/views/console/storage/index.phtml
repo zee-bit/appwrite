@@ -197,7 +197,7 @@ $fileLimitHuman = $this->getParam('fileLimitHuman', 0);
                                         <span data-ls-bind="{{file.mimeType}}" class="tag"></span>
                                     </td>
                                     <td data-title="Size: ">
-                                        <span class="text-fade" data-ls-bind="{{file.sizeOriginal|humanFileSize}}"></span>
+                                        <span class="text-fade" data-ls-bind="{{file.sizeOriginal|humanFileSize}}"></span><span data-ls-bind="{{file.sizeOriginal|humanFileSizeUnit}}" class="text-size-small unit"></span>
                                     </td>
                                     <td data-title="Created: ">
                                         <span class="text-fade" data-ls-bind="{{file.dateCreated|date-text}}"></span>
