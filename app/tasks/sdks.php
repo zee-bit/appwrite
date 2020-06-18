@@ -128,6 +128,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                     case 'dart':
                         $config = new Dart();
                         break;
+                    case 'android-java':
+                        $config = new Java();
+                        break;
                     case 'go':
                         $config = new Go();
                         break;
