@@ -18,7 +18,7 @@ use Appwrite\Auth\Validator\Password;
 use Appwrite\Database\Database;
 use Appwrite\Database\Exception\Duplicate;
 use Appwrite\Database\Validator\UID;
-use DeviceDetector\DeviceDetector;
+use Appwrite\DeviceDetector\DeviceDetector;
 use GeoIp2\Database\Reader;
 
 $utopia->post('/v1/users')

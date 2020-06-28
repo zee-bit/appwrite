@@ -25,7 +25,7 @@ use Appwrite\Database\Validator\Authorization;
 use Appwrite\Template\Template;
 use Appwrite\OpenSSL\OpenSSL;
 use Appwrite\URL\URL as URLParser;
-use DeviceDetector\DeviceDetector;
+use Appwrite\DeviceDetector\DeviceDetector;
 use GeoIp2\Database\Reader;
 use Utopia\Validator\ArrayList;
 
