@@ -30,11 +30,7 @@ services:
   
   appwrite:
     container_name: appwrite
-    build:
-      context: .
-      args:
-        - TESTING=true
-        - VERSION=dev
+    image: appwrite/beta:multi
     restart: unless-stopped
     networks:
       - appwrite
