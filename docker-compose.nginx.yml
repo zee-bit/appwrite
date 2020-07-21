@@ -3,7 +3,7 @@ version: '3'
 services:
   traefik:
     image: traefik:v2.2
-    container_name: appwrite_traefik
+    container_name: appwrite-traefik
     command:
       - --log.level=DEBUG
       - --api.insecure=true
@@ -47,6 +47,7 @@ services:
       - appwrite-cache:/storage/cache:rw
       - appwrite-config:/storage/config:rw
       - appwrite-certificates:/storage/certificates:rw
+      - appwrite-functions:/storage/functions:rw
       - ./phpunit.xml:/usr/src/code/phpunit.xml
       - ./tests:/usr/src/code/tests
       - ./app:/usr/src/code/app
@@ -88,7 +89,7 @@ services:
 
   mariadb:
     image: appwrite/mariadb:1.0.3 # fix issues when upgrading using: mysql_upgrade -u root -p
-    container_name: appwrite_mariadb
+    container_name: appwrite-mariadb
     restart: unless-stopped
     networks:
       - appwrite
@@ -105,7 +106,7 @@ services:
 
   maildev:
     image: djfarrelly/maildev
-    container_name: appwrite_maildev
+    container_name: appwrite-maildev
     restart: unless-stopped
     ports:
       - '1080:80'
@@ -114,7 +115,7 @@ services:
 
   # smtp:
   #   image: appwrite/smtp:1.0.1
-  #   container_name: appwrite_smtp
+  #   container_name: appwrite-smtp
   #   restart: unless-stopped
   #   networks:
   #     - appwrite
@@ -124,7 +125,7 @@ services:
 
   redis:
     image: redis:5.0
-    container_name: appwrite_redis
+    container_name: appwrite-redis
     restart: unless-stopped
     networks:
       - appwrite
@@ -133,7 +134,7 @@ services:
 
   clamav:
     image: appwrite/clamav:1.0.12
-    container_name: appwrite_clamav
+    container_name: appwrite-clamav
     restart: unless-stopped
     networks:
       - appwrite
@@ -142,7 +143,7 @@ services:
 
   influxdb:
     image: influxdb:1.6
-    container_name: appwrite_influxdb
+    container_name: appwrite-influxdb
     restart: unless-stopped
     networks:
       - appwrite
@@ -151,7 +152,7 @@ services:
 
   telegraf:
     image: appwrite/telegraf:1.0.0
-    container_name: appwrite_telegraf
+    container_name: appwrite-telegraf
     restart: unless-stopped
     networks:
       - appwrite
@@ -181,7 +182,7 @@ services:
 
   # chronograf:
   #   image: chronograf:1.5
-  #   container_name: appwrite_chronograf
+  #   container_name: appwrite-chronograf
   #   restart: unless-stopped
   #   networks:
   #   - appwrite
@@ -208,6 +209,7 @@ volumes:
   appwrite-cache:
   appwrite-uploads:
   appwrite-certificates:
+  appwrite-functions:
   appwrite-influxdb:
   appwrite-chronograf:
   appwrite-config:

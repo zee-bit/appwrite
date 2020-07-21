@@ -14,7 +14,6 @@ use Appwrite\ClamAV\Network;
 use Appwrite\Database\Database;
 use Appwrite\Database\Validator\UID;
 use Appwrite\Storage\Storage;
-use Appwrite\Storage\Device\Local;
 use Appwrite\Storage\Validator\File;
 use Appwrite\Storage\Validator\FileSize;
 use Appwrite\Storage\Validator\Upload;
@@ -22,10 +21,6 @@ use Appwrite\Storage\Compression\Algorithms\GZIP;
 use Appwrite\Resize\Resize;
 use Appwrite\OpenSSL\OpenSSL;
 use Utopia\Config\Config;
-
-App::init(function ($project) {
-    Storage::setDevice('local', new Local(APP_STORAGE_UPLOADS.'/app-'.$project->getId()));
-}, ['project'], 'storage');
 
 App::post('/v1/storage/files')
     ->desc('Create File')
@@ -38,7 +33,7 @@ App::post('/v1/storage/files')
     ->label('sdk.description', '/docs/references/storage/create-file.md')
     ->label('sdk.consumes', 'multipart/form-data')
     ->label('sdk.methodType', 'upload')
-    ->param('file', [], function () { return new File(); }, 'Binary File.', false)
+    ->param('file', [], function () { return new File(); }, 'Binary file.', false)
     ->param('read', [], function () { return new ArrayList(new Text(64)); }, 'An array of strings with read permissions. By default no user is granted with any read permissions. [learn more about permissions](/docs/permissions) and get a full list of available permissions.')
     ->param('write', [], function () { return new ArrayList(new Text(64)); }, 'An array of strings with write permissions. By default no user is granted with any write permissions. [learn more about permissions](/docs/permissions) and get a full list of available permissions.')
     ->action(function ($file, $read, $write, $request, $response, $user, $projectDB, $webhooks, $audits, $usage) {
@@ -79,7 +74,7 @@ App::post('/v1/storage/files')
             throw new Exception('File size not allowed', 400);
         }
 
-        $device = Storage::getDevice('local');
+        $device = Storage::getDevice('files');
 
         if (!$upload->isValid($file['tmp_name'])) {
             throw new Exception('Invalid file', 403);
@@ -243,7 +238,7 @@ App::get('/v1/storage/files/:fileId/preview')
         /** @var Appwrite\Database\Document $project */
         /** @var Appwrite\Database\Database $projectDB */
 
-        $storage = 'local';
+        $storage = 'files';
 
         if (!\extension_loaded('imagick')) {
             throw new Exception('Imagick extension is missing', 500);
@@ -286,7 +281,7 @@ App::get('/v1/storage/files/:fileId/preview')
         }
 
         $compressor = new GZIP();
-        $device = Storage::getDevice('local');
+        $device = Storage::getDevice('files');
 
         if (!\file_exists($path)) {
             throw new Exception('File not found', 404);
@@ -375,7 +370,7 @@ App::get('/v1/storage/files/:fileId/download')
         }
 
         $compressor = new GZIP();
-        $device = Storage::getDevice('local');
+        $device = Storage::getDevice('files');
 
         $source = $device->read($path);
 
@@ -432,7 +427,7 @@ App::get('/v1/storage/files/:fileId/view')
         }
 
         $compressor = new GZIP();
-        $device = Storage::getDevice('local');
+        $device = Storage::getDevice('files');
 
         $contentType = 'text/plain';
 
@@ -546,7 +541,7 @@ App::delete('/v1/storage/files/:fileId')
             throw new Exception('File not found', 404);
         }
 
-        $device = Storage::getDevice('local');
+        $device = Storage::getDevice('files');
 
         if ($device->delete($file->getAttribute('path', ''))) {
             if (!$projectDB->deleteDocument($fileId)) {
@@ -579,7 +574,7 @@ App::delete('/v1/storage/files/:fileId')
 //     ->label('sdk.method', 'getFileScan')
 //     ->label('sdk.hide', true)
 //     ->param('fileId', '', function () { return new UID(); }, 'File unique ID.')
-//     ->param('storage', 'local', function () { return new WhiteList(['local']);})
+//     ->param('storage', 'files', function () { return new WhiteList(['files']);})
 //     ->action(
 //         function ($fileId, $storage) use ($response, $request, $projectDB) {
 //             $file = $projectDB->getDocument($fileId);

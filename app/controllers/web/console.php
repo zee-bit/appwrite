@@ -152,7 +152,7 @@ App::get('/console/webhooks')
         /** @var Utopia\View $layout */
 
         $page = new View(__DIR__.'/../../views/console/webhooks/index.phtml');
-        
+
         $page
             ->setParam('events', Config::getParam('events', []))
         ;
@@ -336,5 +336,42 @@ App::get('/console/users/teams/team')
 
         $layout
             ->setParam('title', APP_NAME.' - Team')
+            ->setParam('body', $page);
+    }, ['layout']);
+
+App::get('/console/functions')
+    ->groups(['web', 'console'])
+    ->desc('Platform console project functions')
+    ->label('permission', 'public')
+    ->label('scope', 'console')
+    ->action(function ($layout) {
+        $page = new View(__DIR__.'/../../views/console/functions/index.phtml');
+
+        $page
+            ->setParam('environments', Config::getParam('environments'))
+        ;
+
+        $layout
+            ->setParam('title', APP_NAME.' - Functions')
+            ->setParam('body', $page);
+    }, ['layout']);
+
+App::get('/console/functions/function')
+    ->groups(['web', 'console'])
+    ->desc('Platform console project function')
+    ->label('permission', 'public')
+    ->label('scope', 'console')
+    ->action(function ($layout) {
+        $page = new View(__DIR__.'/../../views/console/functions/function.phtml');
+
+        $page
+            ->setParam('events', Config::getParam('events', []))
+            ->setParam('fileLimit', App::getEnv('_APP_STORAGE_LIMIT', 0))
+            ->setParam('fileLimitHuman', Storage::human(App::getEnv('_APP_STORAGE_LIMIT', 0)))
+            ->setParam('timeout', (int) App::getEnv('_APP_FUNCTIONS_TIMEOUT', 900))
+        ;
+
+        $layout
+            ->setParam('title', APP_NAME.' - Function')
             ->setParam('body', $page);
     }, ['layout']);

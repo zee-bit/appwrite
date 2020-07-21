@@ -284,7 +284,7 @@ App::get('/v1/projects/:projectId/usage')
                 }, $requests)),
             ],
             'network' => [
-                'data' => $network,
+                'data' => \array_map(function ($value) {return ['value' => \round($value['value'] / 1000000, 2), 'date' => $value['date']];}, $network), // convert bytes to mb
                 'total' => \array_sum(\array_map(function ($item) {
                     return $item['value'];
                 }, $network)),
@@ -310,8 +310,17 @@ App::get('/v1/projects/:projectId/usage')
             'storage' => [
                 'total' => $projectDB->getCount(
                     [
+                        'attribute' => 'sizeOriginal',
                         'filters' => [
                             '$collection='.Database::SYSTEM_COLLECTION_FILES,
+                        ],
+                    ]
+                ) + 
+                $projectDB->getCount(
+                    [
+                        'attribute' => 'codeSize',
+                        'filters' => [
+                            '$collection='.Database::SYSTEM_COLLECTION_TAGS,
                         ],
                     ]
                 ),
@@ -466,7 +475,7 @@ App::post('/v1/projects/:projectId/webhooks')
     ->label('sdk.method', 'createWebhook')
     ->param('projectId', null, function () { return new UID(); }, 'Project unique ID.')
     ->param('name', null, function () { return new Text(256); }, 'Webhook name.')
-    ->param('events', null, function () { return new ArrayList(new WhiteList(array_keys(Config::getParam('events')), true)); }, 'Webhook events list.')
+    ->param('events', null, function () { return new ArrayList(new WhiteList(array_keys(Config::getParam('events')), true)); }, 'Events list.')
     ->param('url', null, function () { return new URL(); }, 'Webhook URL.')
     ->param('security', false, function () { return new Boolean(true); }, 'Certificate verification, false for disabled or true for enabled.')
     ->param('httpUser', '', function () { return new Text(256); }, 'Webhook HTTP user.', true)
@@ -602,7 +611,7 @@ App::put('/v1/projects/:projectId/webhooks/:webhookId')
     ->param('projectId', null, function () { return new UID(); }, 'Project unique ID.')
     ->param('webhookId', null, function () { return new UID(); }, 'Webhook unique ID.')
     ->param('name', null, function () { return new Text(256); }, 'Webhook name.')
-    ->param('events', null, function () { return new ArrayList(new WhiteList(array_keys(Config::getParam('events')), true)); }, 'Webhook events list.')
+    ->param('events', null, function () { return new ArrayList(new WhiteList(array_keys(Config::getParam('events')), true)); }, 'Events list.')
     ->param('url', null, function () { return new URL(); }, 'Webhook URL.')
     ->param('security', false, function () { return new Boolean(true); }, 'Certificate verification, false for disabled or true for enabled.')    ->param('httpUser', '', function () { return new Text(256); }, 'Webhook HTTP user.', true)
     ->param('httpPass', '', function () { return new Text(256); }, 'Webhook HTTP password.', true)

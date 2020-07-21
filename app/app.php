@@ -14,6 +14,8 @@ use Appwrite\Database\Database;
 use Appwrite\Database\Document;
 use Appwrite\Database\Validator\Authorization;
 use Appwrite\Network\Validator\Origin;
+use Appwrite\Storage\Device\Local;
+use Appwrite\Storage\Storage;
 
 Config::setParam('domainVerification', false);
 Config::setParam('cookieDomain', 'localhost');
@@ -58,7 +60,7 @@ App::init(function ($utopia, $request, $response, $console, $project, $user, $lo
     $protocol = \parse_url($request->getOrigin($referrer), PHP_URL_SCHEME);
     $port = \parse_url($request->getOrigin($referrer), PHP_URL_PORT);
 
-    $refDomain = $protocol.'://'.((\in_array($origin, $clients))
+    $refDomain = (!empty($protocol) ? $protocol : $request->getProtocol()).'://'.((\in_array($origin, $clients))
         ? $origin : 'localhost') . (!empty($port) ? ':'.$port : '');
 
     $selfDomain = new Domain($request->getHostname());
@@ -86,6 +88,9 @@ App::init(function ($utopia, $request, $response, $console, $project, $user, $lo
         ? null
         : '.'.$request->getHostname()
     );
+
+    Storage::setDevice('files', new Local(APP_STORAGE_UPLOADS.'/app-'.$project->getId()));
+    Storage::setDevice('functions', new Local(APP_STORAGE_FUNCTIONS.'/app-'.$project->getId()));
 
     /*
      * Security Headers
@@ -230,10 +235,11 @@ App::init(function ($utopia, $request, $response, $console, $project, $user, $lo
 
     $usage
         ->setParam('projectId', $project->getId())
-        ->setParam('url', $request->getHostname().$request->getURI())
-        ->setParam('method', $request->getMethod())
-        ->setParam('request', 0)
-        ->setParam('response', 0)
+        ->setParam('httpRequest', 1)
+        ->setParam('httpUrl', $request->getHostname().$request->getURI())
+        ->setParam('httpMethod', $request->getMethod())
+        ->setParam('networkRequestSize', 0)
+        ->setParam('networkResponseSize', 0)
         ->setParam('storage', 0)
     ;
 }, ['utopia', 'request', 'response', 'console', 'project', 'user', 'locale', 'webhooks', 'audits', 'usage', 'clients']);
@@ -266,9 +272,10 @@ App::shutdown(function ($utopia, $request, $response, $project, $webhooks, $audi
     if($project->getId()
         && $mode !== APP_MODE_ADMIN
         && !empty($route->getLabel('sdk.namespace', null))) { // Don't calculate console usage and admin mode
+        
         $usage
-            ->setParam('request', $request->getSize() + $usage->getParam('storage'))
-            ->setParam('response', $response->getSize())
+            ->setParam('networkRequestSize', $request->getSize() + $usage->getParam('storage'))
+            ->setParam('networkResponseSize', $response->getSize())
             ->trigger()
         ;
     }
