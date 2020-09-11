@@ -7,7 +7,9 @@ use Utopia\Swoole\Response as SwooleResponse;
 use Swoole\Http\Response as SwooleHTTPResponse;
 use Appwrite\Database\Document;
 use Appwrite\Utopia\Response\Model;
+use Appwrite\Utopia\Response\Model\Any;
 use Appwrite\Utopia\Response\Model\BaseList;
+use Appwrite\Utopia\Response\Model\Collection;
 use Appwrite\Utopia\Response\Model\Continent;
 use Appwrite\Utopia\Response\Model\Country;
 use Appwrite\Utopia\Response\Model\Currency;
@@ -27,6 +29,7 @@ use Appwrite\Utopia\Response\Model\Log;
 use Appwrite\Utopia\Response\Model\Membership;
 use Appwrite\Utopia\Response\Model\Phone;
 use Appwrite\Utopia\Response\Model\Platform;
+use Appwrite\Utopia\Response\Model\Rule;
 use Appwrite\Utopia\Response\Model\Tag;
 use Appwrite\Utopia\Response\Model\Task;
 use Appwrite\Utopia\Response\Model\Webhook;
@@ -34,6 +37,7 @@ use Appwrite\Utopia\Response\Model\Webhook;
 class Response extends SwooleResponse
 {
     // General
+    const MODEL_ANY = 'any';
     const MODEL_LOG = 'log';
     const MODEL_LOG_LIST = 'logList';
     const MODEL_ERROR = 'error';
@@ -41,33 +45,35 @@ class Response extends SwooleResponse
     const MODEL_BASE_LIST = 'baseList';
     const MODEL_PERMISSIONS = 'permissions';
     
+    // Database
+    const MODEL_COLLECTION = 'collection';
+    const MODEL_COLLECTION_LIST = 'collectionList';
+    const MODEL_RULE = 'rule';
+
     // Users
     const MODEL_USER = 'user';
     const MODEL_USER_LIST = 'userList';
     const MODEL_SESSION = 'session';
     const MODEL_SESSION_LIST = 'sessionList';
     const MODEL_TOKEN = 'token'; // - Missing
-
-    // Database
-    const MODEL_COLLECTION = 'collection'; // - Missing
     
+    // Storage
+    const MODEL_FILE = 'file';
+    const MODEL_FILE_LIST = 'fileList';
+    const MODEL_BUCKET = 'bucket'; // - Missing
+
     // Locale
     const MODEL_LOCALE = 'locale';
     const MODEL_COUNTRY = 'country';
     const MODEL_COUNTRY_LIST = 'countryList';
     const MODEL_CONTINENT = 'continent';
     const MODEL_CONTINENT_LIST = 'continentList';
-    const MODEL_CURRENCY = 'currency'; // - Missing
-    const MODEL_CURRENCY_LIST = 'currencyList'; // - Missing
-    const MODEL_LANGUAGE = 'langauge'; // - Missing
-    const MODEL_LANGUAGE_LIST = 'langaugeList'; // - Missing
-    const MODEL_PHONE = 'phone'; // - Missing
-    const MODEL_PHONE_LIST = 'phoneList'; // - Missing
-
-    // Storage
-    const MODEL_FILE = 'file';
-    const MODEL_FILE_LIST = 'fileList';
-    const MODEL_BUCKET = 'bucket'; // - Missing
+    const MODEL_CURRENCY = 'currency';
+    const MODEL_CURRENCY_LIST = 'currencyList';
+    const MODEL_LANGUAGE = 'langauge';
+    const MODEL_LANGUAGE_LIST = 'langaugeList';
+    const MODEL_PHONE = 'phone';
+    const MODEL_PHONE_LIST = 'phoneList';
 
     // Teams
     const MODEL_TEAM = 'team';
@@ -98,6 +104,11 @@ class Response extends SwooleResponse
     const MODEL_DOMAIN_LIST = 'domainList';
 
     /**
+     * @var array
+     */
+    protected $payload = [];
+
+    /**
      * Response constructor.
      */
     public function __construct(SwooleHTTPResponse $response)
@@ -107,6 +118,7 @@ class Response extends SwooleResponse
             ->setModel(new Error())
             ->setModel(new ErrorDev())
             // Lists
+            ->setModel(new BaseList('Collections List', self::MODEL_COLLECTION_LIST, 'collections', self::MODEL_COLLECTION))
             ->setModel(new BaseList('Users List', self::MODEL_USER_LIST, 'users', self::MODEL_USER))
             ->setModel(new BaseList('Sessions List', self::MODEL_SESSION_LIST, 'sessions', self::MODEL_SESSION))
             ->setModel(new BaseList('Logs List', self::MODEL_LOG_LIST, 'logs', self::MODEL_LOG, false))
@@ -128,6 +140,9 @@ class Response extends SwooleResponse
             ->setModel(new BaseList('Currencies List', self::MODEL_CURRENCY_LIST, 'currencies', self::MODEL_CURRENCY))
             ->setModel(new BaseList('Phones List', self::MODEL_PHONE_LIST, 'phones', self::MODEL_PHONE))
             // Entities
+            ->setModel(new Any())
+            ->setModel(new Collection())
+            ->setModel(new Rule())
             ->setModel(new Log())
             ->setModel(new User())
             ->setModel(new Session())
@@ -148,8 +163,6 @@ class Response extends SwooleResponse
             ->setModel(new Language())
             ->setModel(new Currency())
             ->setModel(new Phone())
-            // Currency
-            // Phone
             // Verification
             // Recovery
         ;
@@ -205,11 +218,15 @@ class Response extends SwooleResponse
     /**
      * Generate valid response object from document data
      */
-    protected function output(Document $document, string $model): array
+    public function output(Document $document, string $model): array
     {
         $data       = $document;
         $model      = $this->getModel($model);
         $output     = [];
+
+        if($model->isAny()) {
+            return $document->getArrayCopy();
+        }
 
         foreach($model->getRules() as $key => $rule) {
             if(!$document->isSet($key)) {
@@ -240,6 +257,8 @@ class Response extends SwooleResponse
             $output[$key] = $data[$key];
         }
 
+        $this->payload = $output;
+
         return $output;
     }
 
@@ -263,5 +282,13 @@ class Response extends SwooleResponse
             ->setContentType(Response::CONTENT_TYPE_YAML)
             ->send(yaml_emit($data, YAML_UTF8_ENCODING))
         ;
+    }
+
+    /**
+     * @return array
+     */
+    public function getPayload():array
+    {
+        return $this->payload;
     }
 }
