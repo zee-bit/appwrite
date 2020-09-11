@@ -34,10 +34,9 @@ App::post('/v1/database/collections')
     ->param('read', [], function () { return new ArrayList(new Text(64)); }, 'An array of strings with read permissions. By default no user is granted with any read permissions. [learn more about permissions](/docs/permissions) and get a full list of available permissions.')
     ->param('write', [], function () { return new ArrayList(new Text(64)); }, 'An array of strings with write permissions. By default no user is granted with any write permissions. [learn more about permissions](/docs/permissions) and get a full list of available permissions.')
     ->param('rules', [], function ($projectDB) { return new ArrayList(new Collection($projectDB, [Database::COLLECTION_RULES], ['$collection' => Database::COLLECTION_RULES, '$permissions' => ['read' => [], 'write' => []]])); }, 'Array of [rule objects](/docs/rules). Each rule define a collection field name, data type and validation.', false, ['projectDB'])
-    ->action(function ($name, $read, $write, $rules, $response, $projectDB, $webhooks, $audits) {
+    ->action(function ($name, $read, $write, $rules, $response, $projectDB, $audits) {
         /** @var Appwrite\Utopia\Response $response */
         /** @var Appwrite\Database\Database $projectDB */
-        /** @var Appwrite\Event\Event $webhooks */
         /** @var Appwrite\Event\Event $audits */
 
         $parsedRules = [];
@@ -84,7 +83,7 @@ App::post('/v1/database/collections')
 
         $response->setStatusCode(Response::STATUS_CODE_CREATED);
         $response->dynamic($data, Response::MODEL_COLLECTION);
-    }, ['response', 'projectDB', 'webhooks', 'audits']);
+    }, ['response', 'projectDB', 'audits']);
 
 App::get('/v1/database/collections')
     ->desc('List Collections')
@@ -153,10 +152,9 @@ App::put('/v1/database/collections/:collectionId')
     ->param('read', [], function () { return new ArrayList(new Text(64)); }, 'An array of strings with read permissions. By default no user is granted with any read permissions. [learn more about permissions(/docs/permissions) and get a full list of available permissions.')
     ->param('write', [], function () { return new ArrayList(new Text(64)); }, 'An array of strings with write permissions. By default no user is granted with any write permissions. [learn more about permissions](/docs/permissions) and get a full list of available permissions.')
     ->param('rules', [], function ($projectDB) { return new ArrayList(new Collection($projectDB, [Database::COLLECTION_RULES], ['$collection' => Database::COLLECTION_RULES, '$permissions' => ['read' => [], 'write' => []]])); }, 'Array of [rule objects](/docs/rules). Each rule define a collection field name, data type and validation.', true, ['projectDB'])
-    ->action(function ($collectionId, $name, $read, $write, $rules, $response, $projectDB, $webhooks, $audits) {
+    ->action(function ($collectionId, $name, $read, $write, $rules, $response, $projectDB, $audits) {
         /** @var Appwrite\Utopia\Response $response */
         /** @var Appwrite\Database\Database $projectDB */
-        /** @var Appwrite\Event\Event $webhooks */
         /** @var Appwrite\Event\Event $audits */
 
         $collection = $projectDB->getDocument(Database::COLLECTION_COLLECTIONS, $collectionId, false);
@@ -206,7 +204,7 @@ App::put('/v1/database/collections/:collectionId')
         ;
 
         $response->dynamic($collection, Response::MODEL_COLLECTION);
-    }, ['response', 'projectDB', 'webhooks', 'audits']);
+    }, ['response', 'projectDB', 'audits']);
 
 App::delete('/v1/database/collections/:collectionId')
     ->desc('Delete Collection')
@@ -260,10 +258,9 @@ App::post('/v1/database/collections/:collectionId/documents')
     ->param('data', [], function () { return new JSON(); }, 'Document data as JSON object.')
     ->param('read', [], function () { return new ArrayList(new Text(64)); }, 'An array of strings with read permissions. By default no user is granted with any read permissions. [learn more about permissions](/docs/permissions) and get a full list of available permissions.')
     ->param('write', [], function () { return new ArrayList(new Text(64)); }, 'An array of strings with write permissions. By default no user is granted with any write permissions. [learn more about permissions](/docs/permissions) and get a full list of available permissions.')
-    ->action(function ($collectionId, $data, $read, $write, $response, $projectDB, $webhooks, $audits) {
+    ->action(function ($collectionId, $data, $read, $write, $response, $projectDB, $audits) {
         /** @var Appwrite\Utopia\Response $response */
         /** @var Appwrite\Database\Database $projectDB */
-        /** @var Appwrite\Event\Event $webhooks */
         /** @var Appwrite\Event\Event $audits */
     
         $data = (\is_string($data)) ? \json_decode($data, true) : $data; // Cast to JSON array
@@ -321,7 +318,7 @@ App::post('/v1/database/collections/:collectionId/documents')
         ;
 
         $response->dynamic($data, Response::MODEL_ANY);
-    }, ['response', 'projectDB', 'webhooks', 'audits']);
+    }, ['response', 'projectDB', 'audits']);
 
 App::get('/v1/database/collections/:collectionId/documents')
     ->desc('List Documents')
@@ -418,10 +415,9 @@ App::patch('/v1/database/collections/:collectionId/documents/:documentId')
     ->param('data', [], function () { return new JSON(); }, 'Document data as JSON object.')
     ->param('read', [], function () { return new ArrayList(new Text(64)); }, 'An array of strings with read permissions. By default no user is granted with any read permissions. [learn more about permissions](/docs/permissions) and get a full list of available permissions.')
     ->param('write', [], function () { return new ArrayList(new Text(64)); }, 'An array of strings with write permissions. By default no user is granted with any write permissions. [learn more about permissions](/docs/permissions) and get a full list of available permissions.')
-    ->action(function ($collectionId, $documentId, $data, $read, $write, $response, $projectDB, $webhooks, $audits) {
+    ->action(function ($collectionId, $documentId, $data, $read, $write, $response, $projectDB, $audits) {
         /** @var Appwrite\Utopia\Response $response */
         /** @var Appwrite\Database\Database $projectDB */
-        /** @var Appwrite\Event\Event $webhooks */
         /** @var Appwrite\Event\Event $audits */
 
         $document = $projectDB->getDocument($collectionId, $documentId, false);
@@ -477,7 +473,7 @@ App::patch('/v1/database/collections/:collectionId/documents/:documentId')
         ;
 
         $response->dynamic($data, Response::MODEL_ANY);
-    }, ['response', 'projectDB', 'webhooks', 'audits']);
+    }, ['response', 'projectDB', 'audits']);
 
 App::delete('/v1/database/collections/:collectionId/documents/:documentId')
     ->desc('Delete Document')
