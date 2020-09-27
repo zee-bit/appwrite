@@ -54,8 +54,8 @@ App::post('/v1/functions')
             'vars' => $vars,
             'events' => $events,
             'schedule' => $schedule,
-            'previous' => null,
-            'next' => null,
+            'schedulePrevious' => null,
+            'scheduleNext' => null,
             'timeout' => $timeout,
         ]);
 
@@ -258,7 +258,7 @@ App::put('/v1/functions/:functionId')
         }
 
         $cron = (!empty($function->getAttribute('tag', null)) && !empty($schedule)) ? CronExpression::factory($schedule) : null;
-        $next = (!empty($function->getAttribute('tag', null)) && !empty($schedule)) ? (int) $cron->getNextRunDate()->format('U') : null;
+        $next = (!empty($function->getAttribute('tag', null)) && !empty($schedule)) ? $cron->getNextRunDate()->format('U') : null;
 
         $function = $projectDB->updateDocument(Database::COLLECTION_FUNCTIONS, $functionId,
             array_merge($function->getArrayCopy(), [
@@ -267,11 +267,24 @@ App::put('/v1/functions/:functionId')
                 'vars' => $vars,
                 'events' => $events,
                 'schedule' => $schedule,
-                'previous' => null,
-                'next' => $next,
+                'schedulePrevious' => null,
+                'scheduleNext' => $next,
                 'timeout' => $timeout,   
             ])
         );
+
+        if ($next) {
+            ResqueScheduler::enqueueAt($next, 'v1-functions', 'FunctionsV1', [
+
+            ]);
+
+            // ->setParam('projectId', $project->getId())
+            // ->setParam('event', $route->getLabel('event', ''))
+            // ->setParam('payload', [])
+            // ->setParam('functionId', null)
+            // ->setParam('executionId', null)
+            // ->setParam('trigger', 'event')
+        }
 
         if (false === $function) {
             throw new Exception('Failed saving function to DB', 500);
@@ -311,7 +324,7 @@ App::patch('/v1/functions/:functionId/tag')
 
         $function = $projectDB->updateDocument(Database::COLLECTION_FUNCTIONS, $functionId, array_merge($function->getArrayCopy(), [
             'tag' => $tag->getId(),
-            'next' => $next,
+            'scheduleNext' => $next,
         ]));
 
         if (false === $function) {

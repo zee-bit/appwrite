@@ -109,6 +109,7 @@ RUN \
   imagemagick-dev \
   certbot \
   docker-cli \
+  docker-compose \
   && pecl install imagick yaml \ 
   && docker-php-ext-enable imagick yaml \
   && docker-php-ext-install sockets opcache pdo_mysql \
@@ -146,6 +147,7 @@ RUN chmod +x /usr/local/bin/doctor && \
     chmod +x /usr/local/bin/install && \
     chmod +x /usr/local/bin/migrate && \
     chmod +x /usr/local/bin/schedule && \
+    chmod +x /usr/local/bin/sdks && \
     chmod +x /usr/local/bin/ssl && \
     chmod +x /usr/local/bin/test && \
     chmod +x /usr/local/bin/vars && \

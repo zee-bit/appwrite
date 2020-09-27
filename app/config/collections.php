@@ -1535,8 +1535,8 @@ $collections = [
             ],
             [
                 '$collection' => Database::COLLECTION_RULES,
-                'label' => 'Previous',
-                'key' => 'previous',
+                'label' => 'Schedule Previous Run',
+                'key' => 'schedulePrevious',
                 'type' => Database::VAR_INTEGER,
                 'default' => '',
                 'required' => false,
@@ -1544,8 +1544,8 @@ $collections = [
             ],
             [
                 '$collection' => Database::COLLECTION_RULES,
-                'label' => 'Next',
-                'key' => 'next',
+                'label' => 'Schedule Next Run',
+                'key' => 'scheduleNext',
                 'type' => Database::VAR_INTEGER,
                 'default' => '',
                 'required' => false,
